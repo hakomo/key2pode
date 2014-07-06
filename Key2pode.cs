@@ -8,6 +8,8 @@ namespace Key2pode {
 
     class Key2pode : LayeredForm {
 
+        private const int MN = 8;
+
         private readonly Stack<Rectangle> boundss = new Stack<Rectangle>();
 
         public Key2pode() {
@@ -57,28 +59,28 @@ namespace Key2pode {
             if(k == Keys.J) {
                 boundss.Push(Bounds);
                 if(Width == 2) {
-                    Update(new Rectangle(Left - 4, Top, Width, Height));
+                    Update(new Rectangle(Left - MN, Top, Width, Height));
                 } else {
                     Update(new Rectangle(Left, Top, Width / 2, Height));
                 }
             } else if(k == Keys.K) {
                 boundss.Push(Bounds);
                 if(Height == 2) {
-                    Update(new Rectangle(Left, Top + 4, Width, Height));
+                    Update(new Rectangle(Left, Top + MN, Width, Height));
                 } else {
                     Update(new Rectangle(Left, (Top + Bottom) / 2, Width, (Height + 1) / 2));
                 }
             } else if(k == Keys.L) {
                 boundss.Push(Bounds);
                 if(Height == 2) {
-                    Update(new Rectangle(Left, Top - 4, Width, Height));
+                    Update(new Rectangle(Left, Top - MN, Width, Height));
                 } else {
                     Update(new Rectangle(Left, Top, Width, Height / 2));
                 }
             } else if(k == Keys.OemSemicolon) {
                 boundss.Push(Bounds);
                 if(Width == 2) {
-                    Update(new Rectangle(Left + 4, Top, Width, Height));
+                    Update(new Rectangle(Left + MN, Top, Width, Height));
                 } else {
                     Update(new Rectangle((Left + Right) / 2, Top, (Width + 1) / 2, Height));
                 }
