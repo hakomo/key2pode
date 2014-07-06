@@ -11,37 +11,46 @@ namespace Key2pode {
         private readonly Stack<Rectangle> boundss = new Stack<Rectangle>();
 
         public Key2pode() {
-            AllowDrop = true;
-            DragEnter += (s, e) => e.Effect = DragDropEffects.All;
             Text = "key2pode";
-            Update(Screen.PrimaryScreen.Bounds);
+            Rectangle r = Screen.PrimaryScreen.Bounds;
+            using(Bitmap b = new Bitmap(r.Width, r.Height))
+            using(Graphics g = Graphics.FromImage(b)) {
+                g.Clear(Color.FromArgb(128, 191, 255, 128));
+                SetLayeredBitmap(r.Location, b);
+            }
         }
 
         private void Update(Rectangle r) {
-            Mouse.Location = new Point((r.Left + r.Right) / 2, (r.Top + r.Bottom) / 2);
-            Location = r.Location;
+            r.Size = new Size(Math.Max(2, r.Width), Math.Max(2, r.Height));
             using(Bitmap b = Create(r.Size))
-                LayeredBitmap = b;
+                SetLayeredBitmap(r.Location, b);
+            Mouse.Location = new Point((r.Left + r.Right) / 2, (r.Top + r.Bottom) / 2);
         }
 
-        private Bitmap Create(Size s) {
+        private static Bitmap Create(Size s) {
+            int i;
             Bitmap bmp = new Bitmap(s.Width, s.Height);
             using(Graphics g = Graphics.FromImage(bmp))
-                g.Clear(Color.FromArgb(128, 191, 255, 128));
+            using(SolidBrush sb = new SolidBrush(Color.FromArgb(128, 191, 255, 128))) {
+                for(i = 0; i < 2; ++i) {
+                    g.FillRectangle(sb, 0, (bmp.Height / 2 + 1) * i, bmp.Width, (bmp.Height - i) / 2);
+                    g.FillRectangle(sb, (bmp.Width / 2 + 1) * i, bmp.Height / 2, (bmp.Width - i) / 2, 1);
+                }
+            }
             return bmp;
         }
 
-        private void OperateMouse(Action a, bool isRepeat = false) {
-            using(Bitmap b = new Bitmap(1, 1))
-                LayeredBitmap = b;
+        private void Operate(Action a) {
+            Neutralize();
+            ++Left;
             a();
-            if(isRepeat) {
-                boundss.Clear();
-                Update(Screen.PrimaryScreen.Bounds);
-                WinAPI.Activate(Handle);
-            } else {
-                Application.Exit();
-            }
+            Close();
+        }
+
+        private void Neutralize() {
+            using(Bitmap b = new Bitmap(2, 2))
+                SetLayeredBitmap(Mouse.Location, b);
+            Mouse.Up();
         }
 
         protected override bool ProcessDialogKey(Keys k) {
@@ -76,26 +85,26 @@ namespace Key2pode {
             } else if(k == Keys.H && boundss.Count > 0) {
                 Update(boundss.Pop());
             } else if(k == Keys.C) {
-                Mouse.Up();
-                OperateMouse(Mouse.Click);
+                Operate(Mouse.Click);
             } else if(k == Keys.R) {
-                Mouse.Up();
-                OperateMouse(Mouse.RightClick);
+                Operate(Mouse.RightClick);
             } else if(k == Keys.M) {
-                Mouse.Up();
-                OperateMouse(Mouse.MiddleClick);
+                Operate(Mouse.MiddleClick);
             } else if(k == Keys.B) {
-                Mouse.Up();
-                OperateMouse(Mouse.DoubleClick);
+                Operate(Mouse.DoubleClick);
             } else if(k == Keys.D) {
                 if(Mouse.IsDown) {
-                    OperateMouse(Mouse.Up);
+                    Mouse.Up();
+                    Close();
                 } else {
-                    OperateMouse(Mouse.Down, true);
+                    Mouse.Down();
+                    boundss.Clear();
+                    Update(Screen.PrimaryScreen.Bounds);
+                    WinAPI.Activate(Handle);
                 }
             } else if(k == Keys.G) {
-                Mouse.Up();
-                Application.Exit();
+                Neutralize();
+                Close();
             }
             return base.ProcessDialogKey(k);
         }
