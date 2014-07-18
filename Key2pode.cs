@@ -111,6 +111,11 @@ namespace Key2pode {
             return base.ProcessDialogKey(k);
         }
 
+        protected override void OnFormClosed(FormClosedEventArgs e) {
+            base.OnFormClosed(e);
+            Mouse.Up();
+        }
+
         [STAThread]
         private static void Main() {
             Util.Run<Key2pode>("63F880FB-11F6-40B0-9BD7-9C37A87B72DC");
